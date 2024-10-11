@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Password Manager - Update Hints
+{% endblock %}
+
+{% block content %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form action="" method="post" enctype="multipart/form-data" class="container">
+    <h2 class="text-success my-3 text-center">UPDATE PASSWORD HINTS</h2>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="first_password_hint">First Password Hint</label>
+            <input type="text" value={{ password_obj.password_hint_one }} class="form-control" name="first_password_hint" id="first_password_hint" />
+        </div>
+
+        <div class="form-group">
+            <label for="second_password_hint">Second Password Hint</label>
+            <input type="text" value={{ password_obj.password_hint_two }} class="form-control" name="second_password_hint" id="second_password_hint" />
+        </div>
+
+        <div class="form-group">
+            <label for="hint_image_changed">Password Hint Image</label>
+            <input type="file" class="form-file-control" name="hint_image_changed" id="hint_image_changed" />
+        </div>
+
+        <div class="container-fluid">
+            <img  class="img-thumbnail w-50 d-block my-3" alt="Password Hint Image" src={{ password_obj.hint_image.url }}>
+
+        <input type="submit" class="btn btn-warning my-3 rounded shadow-sm mx-auto" value="Update Password Hints">
+        </div>
+    </form>
+{% endblock %}
+
