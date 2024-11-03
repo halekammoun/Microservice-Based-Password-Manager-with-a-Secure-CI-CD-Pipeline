@@ -30,7 +30,7 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
       - name: Check out Docker Compose
-        run: docker-compose --version
+        run: docker compose --version
       - name: Start services using Docker Compose
         run: |
-          docker-compose up -d
+          docker compose up -d
