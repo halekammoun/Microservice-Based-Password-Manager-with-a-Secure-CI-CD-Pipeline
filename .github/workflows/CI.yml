@@ -31,6 +31,11 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
       - name: Check out Docker Compose
         run: docker compose --version
-      - name: Start services using Docker Compose
+      - name: Build and run Docker Compose
+        env:
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker compose up -d
