@@ -11,32 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip curl
-
-      # Download SonarQube scanner
-      - name: Download SonarQube scanner
-        run: |
-          curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner.zip -d $HOME/sonar-scanner
-
-      # Set SONAR_SCANNER_HOME environment variable
-      - name: Set SONAR_SCANNER_HOME
-        run: echo "SONAR_SCANNER_HOME=$HOME/sonar-scanner/sonar-scanner-4.6.2.2472-linux" >> $GITHUB_ENV
-
-      # Run SonarQube analysis
-      - name: Run SonarQube Scanner
-        run: |
-          $SONAR_SCANNER_HOME/bin/sonar-scanner \
-            -Dsonar.projectKey=Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline \
-            -Dsonar.sources=.
-
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} 
+      
   build-and-push:
     runs-on: ubuntu-latest
     needs: sonarq-integration  # Ensure SonarQube analysis completes before the build
