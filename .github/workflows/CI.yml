@@ -43,13 +43,18 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
 
       # Step 6: Set up SonarQube scanner
-      - name: Set up SonarQube scanner
-        uses: sonarsource/sonarcloud-github-action@master
-        with:
-          sonar-token: ${{ secrets.SONAR_TOKEN }}  # Secret token from SonarQube
-          sonar-project-key: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"  # Your project key
-          sonar-project-name: "Microservice-Based-Password-Manager"  # Your project name
-          sonar.host.url: ${{ secrets.SONAR_HOST_URL }}  # SonarQube server URL from secrets
+      - name: Run SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Secret token from SonarQube
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}  # SonarQube server URL from secrets
+          SONAR_PROJECT_KEY: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"  # Your project key
+          SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager"  # Your project name
+        run: |
+          # Download the SonarQube scanner (or use a preinstalled version)
+          wget -qO- https://github.com/SonarSource/sonar-scanner-cli/releases/download/4.6.2.2472/sonar-scanner-cli-4.6.2.2472-linux.zip | unzip -d /opt/sonar-scanner -
+          export SONAR_SCANNER_HOME=/opt/sonar-scanner/sonar-scanner-4.6.2.2472
+          export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+          sonar-scanner
 
       # Step 7: Check Docker Compose version (optional check for Compose functionality)
       - name: Check out Docker Compose version
