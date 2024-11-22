@@ -13,7 +13,7 @@
         * `select * from TABLE_NAME;`: show table content
 
 > the application can be accessible from [localhost:8000](http://localhost:8000/)
-
+---
 ## Configuration service SonarQube sur AWS EC2
 Ce guide explique comment héberger le service SonarQube sur une instance AWS EC2.
 
@@ -22,9 +22,7 @@ Ce guide explique comment héberger le service SonarQube sur une instance AWS EC
 - `Type d'instance` : t2.medium
 - `Security Group` : Ports requis 9000 pour SonarQube, 22 pour SSH et 80 pou HTTP.
 
-**Note** : Les spécifications ci-dessus sont les minima recommandés. Vous pouvez les augmenter selon vos besoins.
-
----
+**Note** : Les spécifications ci-dessus sont les min recommandés. Vous pouvez les augmenter selon vos besoins.
 
 ### Étape 1 : Connexion à une Instance Ubuntu EC2
 1. Connectez-vous à votre serveur AWS EC2 en SSH en utiisant PUTTY:
@@ -151,8 +149,8 @@ After=syslog.target network.target
 Type=forking
 ExecStart=/opt/sonarqube/bin/linux-x86-64/sonar.sh start
 ExecStop=/opt/sonarqube/bin/linux-x86-64/sonar.sh stop
-User=sona
-Group=sona
+User=<nom_user>
+Group=<nom_user>
 Restart=always
 LimitNOFILE=65536
 LimitNPROC=4096
