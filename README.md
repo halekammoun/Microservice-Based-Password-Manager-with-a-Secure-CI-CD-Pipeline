@@ -209,7 +209,7 @@ Nom d’utilisateur : `admin`
 Mot de passe : `admin`
 
 <p align="center">
-  <img src="sona.JPG" alt="sona"/>
+  <img src="images/sona.JPG" alt="sona"/>
 </p>
 
 Félicitations !
@@ -344,5 +344,6 @@ build-trivy-scan-and-push:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
 ```
+
 Félicitations !
 Vous avez integré trivy pour scanner votre image. 🎉
