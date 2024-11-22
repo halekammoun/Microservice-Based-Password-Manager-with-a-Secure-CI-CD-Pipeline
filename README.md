@@ -267,6 +267,10 @@ jobs:
 Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.
 Accédez à l'onglet Actions de votre dépôt GitHub.
 Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.
+---
+## Configuration Trivy pour 
+ce job crée une image Docker en local avec le fichier Dockerfile. 
+La construction ne pousse pas encore l'image sur Docker Hub (push: `false`).
 
 <p align="center">
   <img src="high-level diagram.png" alt="high-level diagram"/>
