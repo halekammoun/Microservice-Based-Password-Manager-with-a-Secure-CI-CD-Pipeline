@@ -178,7 +178,7 @@ sudo systemctl status sonar
 ```
 
 <p align="center">
-  <img src="sonar.JPG" alt="sonar"/>
+  <img src="images/sonar.JPG" alt="sonar"/>
 </p>
 
 
