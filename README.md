@@ -243,25 +243,25 @@ sudo systemctl restart sonar.service
 
 dans fichier workflow dans `.github/workflows` ajoutez ce job qui commence par tester la connectivité puis réalise le scan:
 
-```yaml
-jobs:
-  sonarq-integration:
-    runs-on: ubuntu-latest
+``` yaml
 
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    - name: Test SonarQube connectivity
-      run: |
-        curl -v ${{ secrets.SONAR_HOST_URL }}/api/system/status
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} 
-        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
-        SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
+sonarq-integration:
+  runs-on: ubuntu-latest
+
+  steps:
+  - uses: actions/checkout@v2
+    with:
+      fetch-depth: 0
+  - name: Test SonarQube connectivity
+    run: |
+      curl -v ${{ secrets.SONAR_HOST_URL }}/api/system/status
+  - name: SonarQube Scan
+    uses: sonarsource/sonarqube-scan-action@v2
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} 
+      SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
+      SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
 ```
 ### 4. Exécuter le Workflow
 Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.
@@ -269,9 +269,58 @@ Accédez à l'onglet Actions de votre dépôt GitHub.
 Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.
 ---
 ## Configuration Trivy pour 
-ce job crée une image Docker en local avec le fichier Dockerfile. 
+ce job crée une image Docker en local (cloud utilisé pargithub actions) avec le fichier Dockerfile. 
 La construction ne pousse pas encore l'image sur Docker Hub (push: `false`).
+Scanne l'image pour détecter des failles de sécurité ou des dépendances vulnérables.
+Si des vulnérabilités critiques sont détectées, l'étape échoue, empêchant le push de l'image.
+Le push n'est exécuté que si le scan Trivy réussit (aucune vulnérabilité bloquante).
+### 1. Ajouter des Secrets GitHub
 
+Dans votre dépôt GitHub, configurez les secrets suivants :
+1. **`DOCKERHUB_USERNAME`** : Le nom utilisateur de votre compte Dockerhub.
+2. **`DOCKERHUB_TOKEN`** : Le token généré depuis Dockerhub.
+
+### 2. Ajouter le job dans Workflow GitHub Actions
+``` yaml
+
+build-trivy-scan-and-push:
+    runs-on: ubuntu-latest
+    needs: sonarq-integration  # Ensure SonarQube analysis completes before the build 
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build Docker image
+        id: build-image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
+      - name: Push Docker image
+        if: success()  # Push only if Trivy scan succeeds
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
+```
 <p align="center">
   <img src="high-level diagram.png" alt="high-level diagram"/>
 </p>
