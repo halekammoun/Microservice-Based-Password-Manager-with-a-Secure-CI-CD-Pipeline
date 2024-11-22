@@ -26,7 +26,7 @@ jobs:
         SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
         SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
       
-  build-and-push:
+  build-trivy-scan-and-push:
     runs-on: ubuntu-latest
     needs: sonarq-integration  # Ensure SonarQube analysis completes before the build 
 
@@ -50,11 +50,11 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: my-image:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: my-image:latest
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
       - name: Push Docker image
         if: success()  # Push only if Trivy scan succeeds
         uses: docker/build-push-action@v2
@@ -63,7 +63,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
-          
+
       - name: Check out Docker Compose version
         run: docker compose --version
 
