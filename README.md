@@ -13,7 +13,11 @@
         * `select * from TABLE_NAME;`: show table content
 
 > the application can be accessible from [localhost:8000](http://localhost:8000/)
+<p align="center">
+  <img src="high-level diagram.png" alt="high-level diagram"/>
+</p>
 ---
+
 ## Configuration service SonarQube sur AWS EC2
 Ce guide explique comment héberger le service SonarQube sur une instance AWS EC2.
 
@@ -21,6 +25,13 @@ Ce guide explique comment héberger le service SonarQube sur une instance AWS EC
 - `OS` : Ubuntu 22.04 / 20.04 LTS  
 - `Type d'instance` : t2.medium
 - `Security Group` : Ports requis 9000 pour SonarQube, 22 pour SSH et 80 pou HTTP.
+
+<p align="center">
+  <img src="ec2.JPG" alt="ec2"/>
+</p>
+<p align="center">
+  <img src="sg.JPG" alt="sg"/>
+</p>
 
 **Note** : Les spécifications ci-dessus sont les min recommandés. Vous pouvez les augmenter selon vos besoins.
 
@@ -166,6 +177,11 @@ sudo systemctl start sonar
 sudo systemctl status sonar
 ```
 
+<p align="center">
+  <img src="sonar.JPG" alt="sonar"/>
+</p>
+
+
 ### Étape 7 : Optimisation des Limites Système
 1. Modifiez les paramètres du noyau pour Elasticsearch :
 ``` bash
@@ -191,6 +207,10 @@ sudo reboot
 Identifiants par défaut :  
 Nom d’utilisateur : `admin`  
 Mot de passe : `admin`
+
+<p align="center">
+  <img src="sona.JPG" alt="sona"/>
+</p>
 
 Félicitations !
 Vous avez installé SonarQube avec succès sur une instance EC2 Ubuntu. 🎉
@@ -264,10 +284,12 @@ sonarq-integration:
       SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
 ```
 ### 4. Exécuter le Workflow
-Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.
-Accédez à l'onglet Actions de votre dépôt GitHub.
-Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.
+
+Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.  
+Accédez à l'onglet Actions de votre dépôt GitHub.  
+Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.  
 ---
+
 ## Configuration Trivy pour scan d'image  
 
 ce job crée une image Docker en local (cloud utilisé pargithub actions) avec le fichier Dockerfile.  
@@ -322,6 +344,5 @@ build-trivy-scan-and-push:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
 ```
-<p align="center">
-  <img src="high-level diagram.png" alt="high-level diagram"/>
-</p>
+Félicitations !
+Vous avez integré trivy pour scanner votre image. 🎉
