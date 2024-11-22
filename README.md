@@ -27,10 +27,10 @@ Ce guide explique comment héberger le service SonarQube sur une instance AWS EC
 - `Security Group` : Ports requis 9000 pour SonarQube, 22 pour SSH et 80 pou HTTP.
 
 <p align="center">
-  <img src="ec2.JPG" alt="ec2"/>
+  <img src="images/ec2.JPG" alt="ec2"/>
 </p>
 <p align="center">
-  <img src="sg.JPG" alt="sg"/>
+  <img src="images/sg.JPG" alt="sg"/>
 </p>
 
 **Note** : Les spécifications ci-dessus sont les min recommandés. Vous pouvez les augmenter selon vos besoins.
