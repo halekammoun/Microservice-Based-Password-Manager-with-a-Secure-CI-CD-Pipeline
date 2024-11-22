@@ -187,9 +187,9 @@ sudo reboot
 ```
 
 ### Étape 8 : Accès à l’Interface Web
-1. Accédez à SonarQube via : http://<IP_public>:9000
-Identifiants par défaut :
-Nom d’utilisateur : `admin`
+1. Accédez à SonarQube via : http://<IP_public>:9000  
+Identifiants par défaut :  
+Nom d’utilisateur : `admin`  
 Mot de passe : `admin`
 
 Félicitations !
@@ -268,12 +268,13 @@ Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request
 Accédez à l'onglet Actions de votre dépôt GitHub.
 Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.
 ---
-## Configuration Trivy pour 
-ce job crée une image Docker en local (cloud utilisé pargithub actions) avec le fichier Dockerfile. 
-La construction ne pousse pas encore l'image sur Docker Hub (push: `false`).
-Scanne l'image pour détecter des failles de sécurité ou des dépendances vulnérables.
-Si des vulnérabilités critiques sont détectées, l'étape échoue, empêchant le push de l'image.
-Le push n'est exécuté que si le scan Trivy réussit (aucune vulnérabilité bloquante).
+## Configuration Trivy pour scan d'image  
+
+ce job crée une image Docker en local (cloud utilisé pargithub actions) avec le fichier Dockerfile.  
+La construction ne pousse pas encore l'image sur Docker Hub (push: `false`).  
+Scanne l'image pour détecter des failles de sécurité ou des dépendances vulnérables.  
+Si des vulnérabilités critiques sont détectées, l'étape échoue, empêchant le push de l'image.  
+Le push n'est exécuté que si le scan Trivy réussit (aucune vulnérabilité bloquante).  
 ### 1. Ajouter des Secrets GitHub
 
 Dans votre dépôt GitHub, configurez les secrets suivants :
