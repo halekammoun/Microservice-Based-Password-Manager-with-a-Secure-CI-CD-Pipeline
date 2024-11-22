@@ -75,3 +75,41 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker compose up -d
+  zap-scan: 
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+    # Step 2: Check out Docker Compose version
+      - name: Check out Docker Compose version
+        run: docker compose --version
+
+    # Step 3: Build and run Docker Compose
+      - name: Build and run Docker Compose
+        env:
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+        run: |
+          docker compose up -d
+
+    # Step 4: Start ZAP container
+      - name: Start OWASP ZAP
+        run: |
+          docker run -d --name zap -u zap --network="host" owasp/zap2docker-stable zap.sh -daemon -port 8080
+
+    # Step 5: Run ZAP Baseline Scan
+      - name: Run ZAP Baseline Scan
+        run: |
+          docker exec zap zap-baseline.py -t http://localhost:8000 -r zap-report.html
+
+    # Step 6: Upload ZAP Report
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: ZAP Report
+          path: zap-report.html
