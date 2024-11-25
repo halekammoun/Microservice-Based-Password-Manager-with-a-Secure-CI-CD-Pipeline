@@ -77,7 +77,6 @@ jobs:
           docker compose up -d
   zap-scan: 
     runs-on: ubuntu-latest
-
     steps:
     # Step 1: Checkout code
       - name: Checkout code

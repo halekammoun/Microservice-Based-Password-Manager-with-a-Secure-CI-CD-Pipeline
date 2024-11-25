@@ -283,11 +283,16 @@ sonarq-integration:
       SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
       SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
 ```
+
+
+
 ### 4. Exécuter le Workflow
+
 
 Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.  
 Accédez à l'onglet Actions de votre dépôt GitHub.  
 Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.  
+
 ---
 
 ## Configuration Trivy pour scan d'image  
