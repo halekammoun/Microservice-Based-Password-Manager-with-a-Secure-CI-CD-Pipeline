@@ -102,7 +102,7 @@ jobs:
           --network="host" \
           -v $(pwd):/zap/wrk \
           ghcr.io/zaproxy/zaproxy:latest \
-          zap-baseline.py -t http://localhost:8000 -r zap-report.html
+          zap-baseline.py -t http://localhost:8000 -r zap-report.html 
 
     # Step 5: Upload ZAP Report
     - name: Upload ZAP Report
