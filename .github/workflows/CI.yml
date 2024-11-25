@@ -95,16 +95,18 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker compose up -d
-      - name: Run OWASP ZAP security test
-        run: |
-          docker run --rm -u zap \
-            --network="host" \
-            ghcr.io/zaproxy/zaproxy zap-baseline.py \
-            -t http://localhost:8000 \
-            -r zap-report.html
+      # Step 4: Start ZAP container and run scan
+    - name: Run OWASP ZAP Baseline Scan
+      run: |
+        docker run --rm -u zap \
+          --network="host" \
+          -v $(pwd):/zap/wrk \
+          ghcr.io/zaproxy/zaproxy:latest \
+          zap-baseline.py -t http://localhost:8000 -r zap-report.html
 
-      - name: Upload ZAP report
-        uses: actions/upload-artifact@v3
-        with:
-          name: ZAP Report
-          path: zap-report.html
+    # Step 5: Upload ZAP Report
+    - name: Upload ZAP Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: ZAP Report
+        path: zap-report.html
