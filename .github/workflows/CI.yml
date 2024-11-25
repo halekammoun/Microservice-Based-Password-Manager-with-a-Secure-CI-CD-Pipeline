@@ -28,7 +28,7 @@ jobs:
       
   build-trivy-scan-and-push:
     runs-on: ubuntu-latest
-    needs: sonarq-integration  # Ensure SonarQube analysis completes before the build 
+    #needs: sonarq-integration  # Ensure SonarQube analysis completes before the build 
 
     steps:
       - name: Checkout code
