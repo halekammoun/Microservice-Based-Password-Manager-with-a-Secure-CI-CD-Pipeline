@@ -99,7 +99,7 @@ jobs:
     # Step 4: Start ZAP container
       - name: Start OWASP ZAP
         run: |
-          docker run -d --name zap -u zap --network="host" ghcr.io/zaproxy/zaproxy zap.sh -daemon -port 8080
+          docker run -d --name zap -u zap --network="host" ghcr.io/zaproxy/zaproxy zap.sh -daemon -port 8000
 
     # Step 5: Run ZAP Baseline Scan
       - name: Run ZAP Baseline Scan
