@@ -14,7 +14,7 @@
 
 > the application can be accessible from [localhost:8000](http://localhost:8000/)
 <p align="center">
-  <img src="high-level diagram.png" alt="high-level diagram"/>
+  <img src="images/high-level diagram.png" alt="high-level diagram"/>
 </p>
 ---
 
