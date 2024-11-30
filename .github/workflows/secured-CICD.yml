@@ -96,10 +96,18 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           docker compose up -d
+          sleep 15  
+       # Step 4: Test the app with curl
+      - name: Test app accessibility
+        run: |
+          curl --fail http://localhost:8000 || (echo "App is not accessible!" && exit 1)
+
+      # Step 5: Run OWASP ZAP Scan
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.12.0
+        uses: zaproxy/action-full-scan@v0.7.0
         with:
-          target: 'http://localhost:8000'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: http://localhost:8000
 #      - name: Run OWASP ZAP Baseline Scan
 #        uses: zaproxy/action-baseline@v0.5.0
 #        with:
