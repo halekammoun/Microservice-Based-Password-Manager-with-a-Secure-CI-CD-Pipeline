@@ -89,7 +89,7 @@ jobs:
        # Step 4: Test the app with curl
       - name: Test app accessibility
         run: |
-          curl --fail http://localhost:8000 || (echo "App is not accessible!" && exit 1)
+          curl --fail http://web:8000 || (echo "App is not accessible!" && exit 1)
 
       # Step 5: Run OWASP ZAP Scan
       - name: ZAP Scan
