@@ -101,7 +101,7 @@ jobs:
     # Step 5: Test application connectivity
       - name: Test connectivity to the web app
         run: |
-          curl -s "http://172.18.0.3:8000" || echo "Failed to connect"
+          curl http://172.18.0.3:8000
 #       # Step 4: Test the app with curl
 #      - name: Test app accessibility
 #        run: |
