@@ -97,10 +97,8 @@ jobs:
           echo "Web Container ID: $CONTAINER_ID"
           CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
           echo "Web Container IP: $CONTAINER_IP"
-    # Step 5: Test application connectivity
-      - name: Test connectivity to the web app
-        run: |
           curl http://$CONTAINER_IP:8000
+          
 # Step 5: Run OWASP ZAP Scan
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.7.0
