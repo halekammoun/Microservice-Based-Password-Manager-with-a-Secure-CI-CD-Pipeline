@@ -98,4 +98,8 @@ jobs:
           echo "Web Container IP: $CONTAINER_IP"
           echo "container_ip=$CONTAINER_IP" >> $GITHUB_ENV
           curl http://$CONTAINER_IP:8000
-          
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.7.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: http://${{ env.container_ip }}:8000
