@@ -102,14 +102,9 @@ jobs:
       - name: Test connectivity to the web app
         run: |
           curl http://172.18.0.3:8000
-#       # Step 4: Test the app with curl
-#      - name: Test app accessibility
-#        run: |
-#          curl --fail http://web:8000 || (echo "App is not accessible!" && exit 1)
-
-#      # Step 5: Run OWASP ZAP Scan
-#      - name: ZAP Scan
-#        uses: zaproxy/action-full-scan@v0.7.0
-#        with:
-#          token: ${{ secrets.GITHUB_TOKEN }}
-#          target: http://localhost:8000
+# Step 5: Run OWASP ZAP Scan
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.7.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target: http://172.18.0.3:8000
