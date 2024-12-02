@@ -93,7 +93,7 @@ jobs:
       - name: Get web container IP address
         id: get_ip
         run: |
-          CONTAINER_ID=$(docker ps -qf "name=web")
+          CONTAINER_ID=$(docker ps -qf "name=web-1")
           echo "Web Container ID: $CONTAINER_ID"
           CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
           echo "Web Container IP: $CONTAINER_IP"
