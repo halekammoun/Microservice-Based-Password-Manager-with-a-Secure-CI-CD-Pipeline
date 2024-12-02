@@ -87,17 +87,17 @@ jobs:
           docker compose up -d
           sleep 15  
     # Step 4: Get container IP address
-    - name: Get web container IP address
-      id: get_ip
-      run: |
-        CONTAINER_ID=$(docker ps -qf "name=web")
-        CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
-        echo "Web Container IP: $CONTAINER_IP"
-        echo "container_ip=$CONTAINER_IP" >> $GITHUB_ENV
+      - name: Get web container IP address
+        id: get_ip
+        run: |
+          CONTAINER_ID=$(docker ps -qf "name=web")
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+          echo "Web Container IP: $CONTAINER_IP"
+          echo "container_ip=$CONTAINER_IP" >> $GITHUB_ENV
     # Step 5: Test application connectivity
-    - name: Test connectivity to the web app
-      run: |
-        curl -s "http://$CONTAINER_IP:8000" || echo "Failed to connect"
+      - name: Test connectivity to the web app
+        run: |
+          curl -s "http://$CONTAINER_IP:8000" || echo "Failed to connect"
 #       # Step 4: Test the app with curl
 #      - name: Test app accessibility
 #        run: |
