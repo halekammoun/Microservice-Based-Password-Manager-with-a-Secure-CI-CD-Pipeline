@@ -87,6 +87,9 @@ jobs:
           docker compose up -d
           sleep 15  
     # Step 4: Get container IP address
+      - name: Debug Docker containers
+        run: docker ps
+
       - name: Get web container IP address
         id: get_ip
         run: |
