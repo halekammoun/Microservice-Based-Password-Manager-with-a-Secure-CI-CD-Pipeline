@@ -19,6 +19,7 @@ RUN apt-get install -y netcat-openbsd
 
 # Copy the rest of the application code
 COPY . .
+RUN chmod 777 wait-for-it.sh
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
