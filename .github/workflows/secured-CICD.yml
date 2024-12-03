@@ -105,7 +105,7 @@ jobs:
           target: http://${{ env.container_ip }}:8000
           artifact_name: "zap-alerts"
       - name: Upload ZAP Alerts as Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
             name: zap-alerts
             path: ./zap-alerts.json
