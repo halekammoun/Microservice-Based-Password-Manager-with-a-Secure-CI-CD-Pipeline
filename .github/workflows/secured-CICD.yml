@@ -103,10 +103,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: http://${{ env.container_ip }}:8000
+          artifact_name: report
           report_html_name: "zap-report.html"
-          report_output_path: "./zap-output"
       - name: Upload ZAP Scan Report
         uses: actions/upload-artifact@v3
         with:
           name: ZAP-Scan-Report
-          path: ./zap-output/zap-report.html
+          path: report
