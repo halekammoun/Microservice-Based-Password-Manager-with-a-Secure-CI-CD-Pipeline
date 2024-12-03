@@ -104,9 +104,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: http://${{ env.container_ip }}:8000
           artifact_name: "zap-alerts"
-      - name: Retrieve ZAP Alerts
-        run: |
-          echo "Fetching ZAP Alerts..."
-          curl -s http://zap:8090/JSON/core/view/alertsSummary/?baseurl=http://${{ env.container_ip }}:8000 > ./zap-alerts.json
-          echo "Alerts saved to zap-alerts.json"
-          cat ./zap-alerts.json
