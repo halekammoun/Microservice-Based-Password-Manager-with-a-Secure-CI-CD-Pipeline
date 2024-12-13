@@ -124,7 +124,7 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.EC2_HOST }} 'echo Connection Successful'
-      - name: Deploy Kubernetes manifests to EC2
+      - name: Deploy Kubernetes manifest to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i ec2_key.pem k8s-manifests/* ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.EC2_HOST }} << EOF
