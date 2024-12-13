@@ -117,12 +117,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Configure SSH for EC2
         run: |
+# Save private key to a file and set permissions
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
-          kompose convert -f docker-compose.yml
-          kubectl apply -f /home/ubuntu/
-          kubectl get pods
+
+        # Debug EC2 host and SSH connection
+          echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
+        
+        # SSH to EC2 instance and run commands
+          ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
+          # Ensure kompose is installed
+            kompose version
+
+          # Convert docker-compose.yml to Kubernetes manifests
+            kompose convert -f docker-compose.yml
+
+          # Apply Kubernetes manifests to Minikube
+            kubectl apply -f /home/ubuntu/
+
+          # Get the status of Kubernetes pods
+            kubectl get pods
           EOF
