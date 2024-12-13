@@ -140,4 +140,4 @@ jobs:
 
           # Get the status of Kubernetes pods
             kubectl get pods
-          EOF
+            EOF
