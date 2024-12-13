@@ -118,7 +118,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Convert Docker Compose to Kubernetes manifests
-        run: kompose convert --out k8s-manifests
+        run: kompose convert -f docker-compose.yml
       - name: Configure SSH for EC2
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
