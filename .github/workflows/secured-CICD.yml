@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        # with Disabling shallow clone is recommended for improving relevancy of reporting
+        # Disabling shallow clone is recommended for improving relevancy of reporting
         fetch-depth: 0
     - name: Test SonarQube connectivity
       run: |
@@ -21,14 +21,14 @@ jobs:
     - name: SonarQube Scan
       uses: sonarsource/sonarqube-scan-action@v2
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} 
-        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }} 
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
-      
+
   build-trivy-scan-and-push:
     runs-on: ubuntu-latest
-    #needs: sonarq-integration  # Ensure SonarQube analysis completes before the build 
+    #needs: sonarq-integration  # Uncomment to ensure SonarQube analysis completes before the build 
 
     steps:
       - name: Checkout code
@@ -62,20 +62,18 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest        
-  build-and-zap-scan: 
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
+
+  build-and-zap-scan:
     runs-on: ubuntu-latest
     needs: build-trivy-scan-and-push
     steps:
-    # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v2
 
-    # Step 2: Check out Docker Compose version
-      - name: Check out Docker Compose version
+      - name: Check Docker Compose version
         run: docker compose --version
 
-    # Step 3: Build and run Docker Compose
       - name: Build and run Docker Compose
         env:
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
@@ -85,10 +83,11 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           docker compose up -d
-          sleep 15  
-    # Step 4: Get container IP address
+          sleep 15
+
       - name: Debug Docker containers
         run: docker ps
+
       - name: Get web container IP address and check accessibility
         id: get_ip
         run: |
@@ -98,19 +97,23 @@ jobs:
           echo "Web Container IP: $CONTAINER_IP"
           echo "container_ip=$CONTAINER_IP" >> $GITHUB_ENV
           curl http://$CONTAINER_IP:8000
+
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           target: http://${{ env.container_ip }}:8000
           artifact_name: "zap-alerts"
+
       - name: Verify ZAP Alerts File Generation
         run: ls -l | grep report
+
       - name: Upload ZAP Alerts as Artifact
         uses: actions/upload-artifact@v4
         with:
-            name: zap-alerts
-            path: ./report_html.html
+          name: zap-alerts
+          path: ./report_html.html
+
   deploy-to-ec2:
     runs-on: ubuntu-latest
     needs: build-trivy-scan-and-push
@@ -120,24 +123,18 @@ jobs:
 
       - name: Configure SSH for EC2
         run: |
-# Save private key to a file and set permissions
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
-
-        # Debug EC2 host and SSH connection
           echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
-        
-        # SSH to EC2 instance and run commands
+
+      - name: SSH into EC2 and deploy
+        run: |
           ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
-          # Ensure kompose is installed
-            kompose version
+          kompose version
 
-          # Convert docker-compose.yml to Kubernetes manifests
-            kompose convert -f docker-compose.yml
+          kompose convert -f docker-compose.yml
 
-          # Apply Kubernetes manifests to Minikube
-            kubectl apply -f /home/ubuntu/
+          kubectl apply -f /home/ubuntu/
 
-          # Get the status of Kubernetes pods
-            kubectl get pods
-            EOF
+          kubectl get pods
+          EOF
