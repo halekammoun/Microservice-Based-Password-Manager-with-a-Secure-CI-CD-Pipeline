@@ -129,6 +129,7 @@ jobs:
 
       - name: SSH into EC2 and deploy
         run: |
+          scp -i ec2_key.pem docker-compose.yml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
           ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
           minikube stop
           minikube start
