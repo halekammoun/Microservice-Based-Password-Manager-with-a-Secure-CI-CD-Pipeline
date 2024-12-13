@@ -117,13 +117,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Convert Docker Compose to Kubernetes manifests
-        run: kompose convert -f docker-compose.yml
       - name: Configure SSH for EC2
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.EC2_HOST }} 'echo Connection Successful'
+      - name: Convert Docker Compose to Kubernetes manifests
+        run: kompose convert -f docker-compose.yml
       - name: Deploy Kubernetes manifest to EC2
         run: |
           scp -o StrictHostKeyChecking=no -i ec2_key.pem k8s-manifests/* ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/
