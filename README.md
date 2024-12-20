@@ -255,6 +255,9 @@ sudo reboot
 Félicitations !
 Vous avez installé SonarQube avec succès sur une instance EC2 Ubuntu. 🎉
 
+
+---
+
 ## Intégration de SonarQube sur AWS EC2 via GitHub Actions Workflow
 
 Ce guide explique comment intégrer le service SonarQube hébergé sur une instance AWS EC2 dans un pipeline GitHub Actions pour l'analyse continue du code.
@@ -266,7 +269,6 @@ Ce guide explique comment intégrer le service SonarQube hébergé sur une insta
 - Un dépôt GitHub contenant le code source à analyser.
 - Une configuration correcte du projet token projectKey unique pour chaque projet.
 
----
 
 ## Étapes d'Intégration
 
@@ -286,7 +288,6 @@ Dans votre dépôt GitHub, configurez les secrets suivants :
 2. **`SONAR_TOKEN`** : Le token généré depuis SonarQube.
 3. **`SONAR_PROJECT_KEY`** : La clé du projet dans Sonarqube.
 
----
 
 ### 3. modifier le fichier de configuration de sonar systemd service en /opt/sonarqube/conf/sonar.properties
 
@@ -331,6 +332,7 @@ sonarq-integration:
 Poussez votre code sur la branche main (dans mon cas) ou ouvrez une Pull Request.  
 Accédez à l'onglet Actions de votre dépôt GitHub.  
 Suivez l'exécution du workflow et vérifiez les résultats dans SonarQube.
+
 
 ---
 
@@ -394,7 +396,10 @@ build-trivy-scan-and-push:
 Félicitations !
 Vous avez integré trivy pour scanner votre image. 🎉
 
-## Workflow de Construction et Analyse avec ZAP
+
+---
+
+## Construction et Analyse avec ZAP
 
 si dessous les étapes exécutées dans la phase `build-and-zap-scan` du pipeline CI/CD. Cette phase effectue les tâches suivantes :  
 
@@ -406,6 +411,7 @@ si dessous les étapes exécutées dans la phase `build-and-zap-scan` du pipelin
 - Téléchargement du rapport d'analyse ZAP comme artefact.
 
 ## Étapes
+
 
 ### 1. Récupération du Code Source
 Le code du dépôt est récupéré dans l'environnement du runner à l'aide de l'action GitHub [actions/checkout@v2](https://github.com/actions/checkout).
