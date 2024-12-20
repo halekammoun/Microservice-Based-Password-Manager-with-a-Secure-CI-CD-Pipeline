@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: halakammoun/web
+        command: ["/bin/sh", "-c"]
+        args: ["python manage.py runserver 0.0.0.0:8000"]
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: db-secret
+        volumeMounts:
+        - name: app-data
+          mountPath: /app
+        ports:
+        - containerPort: 8000
+      volumes:
+      - name: app-data
+        emptyDir: {}
