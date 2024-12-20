@@ -393,3 +393,133 @@ build-trivy-scan-and-push:
 
 Félicitations !
 Vous avez integré trivy pour scanner votre image. 🎉
+
+## Workflow de Construction et Analyse avec ZAP
+
+si dessous les étapes exécutées dans la phase `build-and-zap-scan` du pipeline CI/CD. Cette phase effectue les tâches suivantes :  
+
+- Récupération du code source.
+- Vérification de l'installation de Docker Compose.
+- Construction et exécution des services via Docker Compose.
+- Inspection et vérification de l'état des conteneurs.
+- Analyse de sécurité avec ZAP (Zed Attack Proxy) pour identifier les vulnérabilités de l'application.
+- Téléchargement du rapport d'analyse ZAP comme artefact.
+
+## Étapes
+
+### 1. Récupération du Code Source
+Le code du dépôt est récupéré dans l'environnement du runner à l'aide de l'action GitHub [actions/checkout@v2](https://github.com/actions/checkout).
+
+```yaml
+- name: Checkout code
+  uses: actions/checkout@v2
+```
+
+### 2. Vérification de la Version de Docker Compose
+Vérifie que Docker Compose est installé et affiche la version.
+
+```yaml
+- name: Check Docker Compose version
+  run: docker compose --version
+```
+
+### 3. Construction et Exécution avec Docker Compose
+Construit et démarre les services définis dans le fichier `docker-compose.yml`. Les variables d'environnement sont sécurisées avec les Secrets GitHub.
+
+```yaml
+- name: Build and run Docker Compose
+  env:
+    MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+    MYSQL_USER: ${{ secrets.MYSQL_USER }}
+    MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+    MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  run: |
+    docker compose up -d
+    sleep 15
+```
+
+### 4. Débogage des Conteneurs Docker
+Liste tous les conteneurs Docker en cours d'exécution pour vérifier que les services sont démarrés.
+
+```yaml
+- name: Debug Docker containers
+  run: docker ps
+```
+
+### 5. Obtenir l'Adresse IP du Conteneur Web et Vérifier l'Accessibilité
+Récupère l'adresse IP du conteneur nommé `web` et vérifie que l'application est accessible.
+
+```yaml
+- name: Get web container IP address and check accessibility
+  id: get_ip
+  run: |
+    CONTAINER_ID=$(docker ps -qf "name=web")
+    echo "Web Container ID: $CONTAINER_ID"
+    CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+    echo "Web Container IP: $CONTAINER_IP"
+    echo "container_ip=$CONTAINER_IP" >> $GITHUB_ENV
+    curl http://$CONTAINER_IP:8000
+```
+
+### 6. Analyse avec ZAP
+Utilise l'action [ZAP Full Scan](https://github.com/zaproxy/action-full-scan) pour effectuer une analyse de vulnérabilités de l'application web.
+
+```yaml
+- name: ZAP Scan
+  uses: zaproxy/action-full-scan@v0.7.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    target: http://${{ env.container_ip }}:8000
+    artifact_name: "zap-alerts"
+```
+
+### 7. Vérification de la Génération du Fichier d'Alerte ZAP
+S'assure que le fichier de rapport d'analyse ZAP est généré avec succès.
+
+```yaml
+- name: Verify ZAP Alerts File Generation
+  run: ls -l | grep report
+```
+
+### 8. Téléchargement des Alertes ZAP comme Artefact
+Télécharge le rapport d'analyse ZAP dans les artefacts GitHub pour examen ultérieur.
+
+```yaml
+- name: Upload ZAP Alerts as Artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: zap-alerts
+    path: ./report_html.html
+```
+
+## Prérequis
+- Docker et Docker Compose doivent être installés sur le runner.
+- Le fichier `docker-compose.yml` doit définir les services de l'application.
+- Les Secrets GitHub doivent être configurés pour les variables d'environnement requises (`MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `DATABASE_URL`).
+
+## Résultats
+
+- Un rapport d'analyse ZAP (`report_html.html`) est téléchargé comme artefact dans GitHub Actions comme suit,
+Les artefacts du dernier run du workflow peuvent être téléchargés depuis la page GitHub Actions.
+
+1. Allez sur la [page Actions] (https://github.com/halekammoun/Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline/actions).
+2. Sélectionnez le dernier run.
+3. Faites défiler jusqu'à la section **Artefacts** et téléchargez l'artefact nommé `zap-alerts`.
+<p align="center">
+  <img src="images/zap1.JPG" alt="high-level diagram"/>
+</p>
+
+4. Extractes le Zip et consultes le rapport `report_html.html`
+<p align="center">
+  <img src="images/zap2.JPG" alt="high-level diagram"/>
+</p>
+<p align="center">
+  <img src="images/zap3.JPG" alt="high-level diagram"/>
+</p>
+
+## Remarques
+- Ajustez la durée de `sleep` dans l'étape Docker Compose en fonction du temps de démarrage de vos services.
+- Assurez-vous que le nom du conteneur web correspond au nom défini dans votre fichier `docker-compose.yml`.
+- Examinez le rapport d'analyse ZAP pour résoudre les vulnérabilités identifiées.
+

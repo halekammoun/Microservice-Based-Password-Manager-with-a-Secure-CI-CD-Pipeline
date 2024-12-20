@@ -16,7 +16,7 @@ spec:
       - name: web
         image: halakammoun/web
         command: ["/bin/sh", "-c"]
-        args: ["python manage.py runserver 0.0.0.0:8000"]
+        args: ["bash wait-for-it.sh db 3306 -- python manage.py runserver 0.0.0.0:8000"]
         envFrom:
         - configMapRef:
             name: app-config
@@ -24,7 +24,7 @@ spec:
             name: db-secret
         volumeMounts:
         - name: app-data
-          mountPath: /app
+          mountPath: /app-data
         ports:
         - containerPort: 8000
       volumes:
