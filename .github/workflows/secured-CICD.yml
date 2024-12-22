@@ -9,28 +9,27 @@ on:
 jobs:
   sonarq-integration:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-        with:
-          # Disabling shallow clone improves reporting relevancy
-          fetch-depth: 0
-
-      - name: Test SonarQube connectivity
-        run: |
-          curl -v ${{ secrets.SONAR_HOST_URL }}/api/system/status
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
-          SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
+    - uses: actions/checkout@v2
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: Test SonarQube connectivity
+      run: |
+        curl -v ${{ secrets.SONAR_HOST_URL }}/api/system/status
+    - name: SonarQube Scan
+      uses: sonarsource/sonarqube-scan-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+        SONAR_PROJECT_NAME: "Microservice-Based-Password-Manager-with-a-Secure-CI-CD-Pipeline"
 
   build-trivy-scan-and-push:
     runs-on: ubuntu-latest
-    # Uncomment the next line to ensure this job waits for SonarQube analysis
-    # needs: sonarq-integration
+    #needs: sonarq-integration  # Uncomment to ensure SonarQube analysis completes before the build 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -52,14 +51,12 @@ jobs:
           file: ./Dockerfile
           push: false
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
-
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/web:latest
-
       - name: Push Docker image
-        if: success()
+        if: success()  # Push only if Trivy scan succeeds
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -116,37 +113,3 @@ jobs:
         with:
           name: zap-alerts
           path: ./report_html.html
-
-  deploy-to-ec2:
-    runs-on: ubuntu-latest
-    needs: build-trivy-scan-and-push
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Configure SSH for EC2
-        run: |
-          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
-          chmod 600 ec2_key.pem
-          echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
-
-      - name: SSH into EC2 and deploy
-        run: |
-          scp -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
-          minikube stop
-          minikube start
-          kubectl create -f configmap.yaml
-          kubectl create -f secret.yaml
-          kubectl create -f db-deployment.yaml
-          kubectl create -f web-deployment.yaml
-          kubectl create -f db-service.yaml
-          kubectl create -f web-service.yaml
-          sleep 50
-          kubectl get pods
-          EOF
