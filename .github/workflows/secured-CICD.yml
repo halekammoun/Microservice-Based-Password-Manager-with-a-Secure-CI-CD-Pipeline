@@ -125,6 +125,9 @@ jobs:
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
           echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
+
+      - name: SSH into EC2 and deploy
+        run: |
           scp -o StrictHostKeyChecking=no -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
           scp -o StrictHostKeyChecking=no -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
