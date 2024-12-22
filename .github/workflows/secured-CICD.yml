@@ -28,7 +28,7 @@ jobs:
 
   build-trivy-scan-and-push:
     runs-on: ubuntu-latest
-    #needs: sonarq-integration  # Uncomment to ensure SonarQube analysis completes before the build 
+    needs: sonarq-integration  # Uncomment to ensure SonarQube analysis completes before the build 
 
     steps:
       - name: Checkout code
@@ -113,3 +113,36 @@ jobs:
         with:
           name: zap-alerts
           path: ./report_html.html
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+    needs: build-and-zap-scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure SSH for EC2
+        run: |
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
+          chmod 600 ec2_key.pem
+          echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
+
+      - name: SSH into EC2 and deploy
+        run: |
+          scp -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
+          minikube stop
+          minikube start
+          kubectl create -f configmap.yaml
+          kubectl create -f secret.yaml
+          kubectl create -f db-deployment.yaml
+          kubectl create -f web-deployment.yaml
+          kubectl create -f db-service.yaml
+          kubectl create -f web-service.yaml
+          sleep 50
+          kubectl get pods
+          EOF
