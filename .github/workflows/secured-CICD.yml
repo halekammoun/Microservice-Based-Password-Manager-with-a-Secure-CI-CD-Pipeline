@@ -129,11 +129,21 @@ jobs:
 
       - name: SSH into EC2 and deploy
         run: |
-          scp -i ec2_key.pem docker-compose.yml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
           ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
           minikube stop
           minikube start
-          kompose convert -f docker-compose.yml
-          kubectl apply -f /home/ubuntu/
+          kubectl create -f configmap.yaml
+          kubectl create -f secret.yaml
+          kubectl create -f db-deployment.yaml
+          kubectl create -f web-deployment.yaml
+          kubectl create -f db-service.yaml
+          kubectl create -f web-service.yaml
+          sleep 50
           kubectl get pods
           EOF
