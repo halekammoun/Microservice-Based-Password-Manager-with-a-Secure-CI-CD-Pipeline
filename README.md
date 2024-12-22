@@ -499,12 +499,12 @@ Télécharge le rapport d'analyse ZAP dans les artefacts GitHub pour examen ult�
     path: ./report_html.html
 ```
 
-## Prérequis
+### Prérequis
 - Docker et Docker Compose doivent être installés sur le runner.
 - Le fichier `docker-compose.yml` doit définir les services de l'application.
 - Les Secrets GitHub doivent être configurés pour les variables d'environnement requises (`MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `DATABASE_URL`).
 
-## Résultats
+### Résultats
 
 - Un rapport d'analyse ZAP (`report_html.html`) est téléchargé comme artefact dans GitHub Actions comme suit,
 Les artefacts du dernier run du workflow peuvent être téléchargés depuis la page GitHub Actions.
@@ -524,8 +524,104 @@ Les artefacts du dernier run du workflow peuvent être téléchargés depuis la 
   <img src="images/zap3.JPG" alt="high-level diagram"/>
 </p>
 
-## Remarques
+### Remarques
 - Ajustez la durée de `sleep` dans l'étape Docker Compose en fonction du temps de démarrage de vos services.
 - Assurez-vous que le nom du conteneur web correspond au nom défini dans votre fichier `docker-compose.yml`.
 - Examinez le rapport d'analyse ZAP pour résoudre les vulnérabilités identifiées.
 
+Félicitations !
+Vous avez integré zap pour scanner votre site web. 🎉
+
+---
+
+## Déploiement sur EC2 avec Minikube
+Nous avons automatisé le déploiement de notre application Kubernetes via un workflow GitHub Actions, qui s'exécute après la construction et le scan de sécurité du projet.
+
+Voici les étapes clés du workflow :
+### 1. Checkout du code : 
+Le code source est récupéré à partir du dépôt GitHub pour être déployé sur l'instance EC2.
+
+```yaml
+- name: Checkout code
+  uses: actions/checkout@v2
+```
+### 2. Configuration SSH pour EC2 :
+La clé privée EC2 est récupérée à partir des secrets GitHub, puis elle est enregistrée et configurée avec les permissions appropriées pour se connecter à l'instance EC2.
+
+```yaml
+- name: Configure SSH for EC2 and deploy
+  run: |
+    echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2_key.pem
+    chmod 600 ec2_key.pem
+    echo "Connecting to EC2 Host: ${{ secrets.K8S_HOST }}"
+```
+### 3. Déploiement via SSH sur EC2 : 
+Une fois la connexion SSH établie, les fichiers YAML en local (configmap, secret, déploiements, et services) sont transférés sur l'instance EC2 avec scp.  
+Ensuite, la commande SSH est utilisée pour redémarrer Minikube et déployer les fichiers Kubernetes.
+
+```yaml
+- name: SSH into EC2 and deploy
+  run: |
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    scp -o StrictHostKeyChecking=no -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+    ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
+    minikube stop
+    minikube start
+    kubectl create -f configmap.yaml
+    kubectl create -f secret.yaml
+    kubectl create -f db-deployment.yaml
+    kubectl create -f web-deployment.yaml
+    kubectl create -f db-service.yaml
+    kubectl create -f web-service.yaml
+    sleep 50
+    kubectl get pods
+    EOF
+```
+### 4. Configuration d'iptables sur EC2
+Pour permettre l'accès externe au service Kubernetes, nous avons configuré les règles iptables sur l'instance EC2 pour rediriger le trafic vers le port exposé par Minikube.
+
+#### Commandes iptables exécutées sur l'instance EC2 :
+Redirection du port d'entrée :  
+Cette règle redirige le trafic entrant sur le port 30001 vers le port 30001 sur l'adresse IP interne de Minikube.
+
+```bash
+sudo iptables -A PREROUTING -t nat -i enX0 -p tcp --dport 30001 -j DNAT --to 192.168.49.2:30001
+```
+Autorisation de transfert de paquets :  
+Cette règle permet le transfert du trafic vers le service de l'application en autorisant le trafic sur le port 30001.
+
+```bash
+sudo iptables -A FORWARD -p tcp -d 192.168.49.2 --dport 30001 -j ACCEPT
+```
+### 5. Accès au service Web via Minikube
+Une fois les règles iptables appliquées, vous pouvez lister les services Minikube et exposer le service web en utilisant minikube tunnel. Voici les étapes :
+
+Liste des services exposés par Minikube :
+
+```bash
+minikube service list
+```
+Tunnel Minikube pour accéder aux services externes :  
+Cette commande ouvre un tunnel réseau pour exposer les services Minikube à l'extérieur.
+
+```bash
+minikube tunnel
+```
+Accéder au service web : Vous pouvez maintenant accéder à votre application web en utilisant l'IP publique de votre instance EC2 et le port 30001 :
+
+```bash
+http://18.212.165.107:30001/
+```
+Cela vous permettra de voir la page web déployée depuis votre cluster Kubernetes exécuté sur Minikube sur EC2.
+
+<p align="center">
+  <img src="images/page.JPG" alt="high-level diagram"/>
+</p>
+
+
+Félicitations !
+Vous avez automtisé le déploiement vers minikube dans un EC2. 🎉
