@@ -128,12 +128,12 @@ jobs:
 
       - name: SSH into EC2 and deploy
         run: |
-          scp -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
-          scp -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem configmap.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem secret.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem db-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem web-deployment.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem db-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem web-service.yaml ubuntu@${{ secrets.K8S_HOST }}:/home/ubuntu/
           ssh -v -o StrictHostKeyChecking=no -i ec2_key.pem ubuntu@${{ secrets.K8S_HOST }} << EOF
           minikube stop
           minikube start
