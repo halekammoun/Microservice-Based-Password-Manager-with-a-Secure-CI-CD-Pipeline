@@ -619,7 +619,7 @@ http://18.212.165.107:30001/
 Cela vous permettra de voir la page web déployée depuis votre cluster Kubernetes exécuté sur Minikube sur EC2.
 
 <p align="center">
-  <img src="images/page.JPG" alt="high-level diagram"/>
+  <img src="images/page.JPG" alt="high-leveldiagram"/>
 </p>
 
 
